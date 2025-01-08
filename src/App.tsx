@@ -64,7 +64,7 @@ const SUPERSCRIPTS = {
     ')': '⁾',
     '=': '⁼',
     '.': '˙',
-    '/': '⸍',
+    '/': 'ᐟ',
 };
 
 export default function App () {
