@@ -60,6 +60,11 @@ const SUPERSCRIPTS = {
     'x': 'ˣ',
     'y': 'ʸ',
     'z': 'ᶻ',
+    '(': '⁽',
+    ')': '⁾',
+    '=': '⁼',
+    '.': '˙',
+    '/': '⸍',
 };
 
 export default function App () {
@@ -89,8 +94,8 @@ export default function App () {
                 let superscriptResult = '';
                 for ( let index = 0; index < transformedOutput.length; index++ ) {
                     let character = transformedOutput[ index ];
-                    if ( character.toLowerCase() in SUPERSCRIPTS ) {
-                        superscriptResult += SUPERSCRIPTS[ character.toLowerCase() as keyof typeof SUPERSCRIPTS ];
+                    if ( character.toLowerCase () in SUPERSCRIPTS ) {
+                        superscriptResult += SUPERSCRIPTS[ character.toLowerCase () as keyof typeof SUPERSCRIPTS ];
                     } else {
                         superscriptResult += character;
                     }
