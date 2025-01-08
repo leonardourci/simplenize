@@ -1,7 +1,66 @@
 import React, { useState, useEffect } from 'react';
+
+import PortugueseTranslation from './translations/PT';
+import EnglishTranslation from './translations/EN';
 import SimplenizeHeaderLogo from './images/simplenize-logo.png';
 
-const transformationOptions = [ 'MAIÚSCULAS', 'MINÚSCULAS', 'Parágrafos para uma linha', 'Primeiras Em Maiúsculas' ];
+const TRANSLATION = {
+    PT: PortugueseTranslation,
+    EN: EnglishTranslation,
+};
+
+const WEB_USER_LANGUAGE = navigator.language.split ( '-' )[ 0 ].toUpperCase () as 'PT' | 'EN';
+
+const WEB_TRANSLATION = TRANSLATION[ WEB_USER_LANGUAGE ] || TRANSLATION.EN;
+
+const textTransformationOptions = [
+    WEB_TRANSLATION.transformationOptions.upperCase,
+    WEB_TRANSLATION.transformationOptions.lowerCase,
+    WEB_TRANSLATION.transformationOptions.capitalize,
+    WEB_TRANSLATION.transformationOptions.paragraphsToOneLine,
+    WEB_TRANSLATION.transformationOptions.superscript,
+];
+
+const SUPERSCRIPTS = {
+    ' ': ' ',
+    '0': '⁰',
+    '1': '¹',
+    '2': '²',
+    '3': '³',
+    '4': '⁴',
+    '5': '⁵',
+    '6': '⁶',
+    '7': '⁷',
+    '8': '⁸',
+    '9': '⁹',
+    '+': '⁺',
+    '-': '⁻',
+    'a': 'ᵃ',
+    'b': 'ᵇ',
+    'c': 'ᶜ',
+    'd': 'ᵈ',
+    'e': 'ᵉ',
+    'f': 'ᶠ',
+    'g': 'ᵍ',
+    'h': 'ʰ',
+    'i': 'ⁱ',
+    'j': 'ʲ',
+    'k': 'ᵏ',
+    'l': 'ˡ',
+    'm': 'ᵐ',
+    'n': 'ⁿ',
+    'o': 'ᵒ',
+    'p': 'ᵖ',
+    'r': 'ʳ',
+    's': 'ˢ',
+    't': 'ᵗ',
+    'u': 'ᵘ',
+    'v': 'ᵛ',
+    'w': 'ʷ',
+    'x': 'ˣ',
+    'y': 'ʸ',
+    'z': 'ᶻ',
+};
 
 export default function App () {
     const [ input, setInput ] = useState ( '' );
@@ -17,13 +76,29 @@ export default function App () {
         let transformedOutput = input;
 
         switch ( selectedTransformation ) {
-            case 'Parágrafos para uma linha':
+            case WEB_TRANSLATION.transformationOptions.paragraphsToOneLine:
                 transformedOutput = transformedOutput.replace ( /\s+|\n/g, ' ' ).trim ();
                 break;
-            case 'MAIÚSCULAS':
+            case WEB_TRANSLATION.transformationOptions.upperCase:
                 transformedOutput = transformedOutput.toUpperCase ();
                 break;
-            case 'Primeiras Em Maiúsculas':
+            case WEB_TRANSLATION.transformationOptions.lowerCase:
+                transformedOutput = transformedOutput.toLowerCase ();
+                break;
+            case WEB_TRANSLATION.transformationOptions.superscript:
+                let superscriptResult = '';
+                for ( let index = 0; index < transformedOutput.length; index++ ) {
+                    let character = transformedOutput[ index ];
+                    if ( character.toLowerCase() in SUPERSCRIPTS ) {
+                        superscriptResult += SUPERSCRIPTS[ character.toLowerCase() as keyof typeof SUPERSCRIPTS ];
+                    } else {
+                        superscriptResult += character;
+                    }
+                }
+                transformedOutput = superscriptResult;
+
+                break;
+            case WEB_TRANSLATION.transformationOptions.capitalize:
                 const result: string[] = [];
                 const textWords = transformedOutput.split ( ' ' );
                 for ( const word of textWords ) {
@@ -39,15 +114,12 @@ export default function App () {
                 for ( const word of multipleLinesSplit ) {
                     if ( word.length ) {
                         const capitalizedWord = word.slice ( 1 );
-                        const lastCharacter = selectedTransformation.includes ( 'Parágrafos para uma linha' ) ? ' ' : '\n';
+                        const lastCharacter = selectedTransformation.includes ( WEB_TRANSLATION.transformationOptions.paragraphsToOneLine ) ? ' ' : '\n';
                         finalResult.push ( word[ 0 ].toUpperCase () + capitalizedWord + lastCharacter );
                     }
                 }
 
                 transformedOutput = finalResult.join ( '' );
-                break;
-            case 'MINÚSCULAS':
-                transformedOutput = transformedOutput.toLowerCase ();
                 break;
         }
 
@@ -79,7 +151,7 @@ export default function App () {
                         <div className="p-8 space-y-8">
                             <div>
                                 <label htmlFor="multiline" className="block text-xl font-semibold text-gray-800 mb-3">
-                                    Texto para transformar:
+                                    { WEB_TRANSLATION.textToTransform }
                                 </label>
                                 <textarea
                                     id="multiline"
@@ -87,16 +159,16 @@ export default function App () {
                                     onChange={ ( e ) => setInput ( e.target.value ) }
                                     rows={ 6 }
                                     className="w-full p-4 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out resize-none"
-                                    placeholder="Escreva seu texto em parágrafos aqui..."
+                                    placeholder={ WEB_TRANSLATION.placeholder }
                                 />
                             </div>
 
                             <div>
                                 <h2 className="block text-xl font-semibold text-gray-800 mb-3">
-                                    Selecione uma transformação:
+                                    { WEB_TRANSLATION.selectATransformation }
                                 </h2>
                                 <div className="flex flex-wrap gap-2">
-                                    { transformationOptions.map ( ( option ) => (
+                                    { textTransformationOptions.map ( ( option ) => (
                                         <button
                                             key={ option }
                                             className={ `px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ease-in-out ${
@@ -113,7 +185,7 @@ export default function App () {
                             </div>
                             <div>
                                 <label htmlFor="singleline" className="block text-xl font-semibold text-gray-800 mb-3">
-                                    Resultado:
+                                    { WEB_TRANSLATION.output }
                                 </label>
                                 <div className="flex">
                                     <textarea
@@ -137,7 +209,7 @@ export default function App () {
 
                             { copySuccess && (
                                 <p className="text-green-600 text-sm text-center font-medium animate-pulse"
-                                   role="alert">Texto copiado com sucesso!</p>
+                                   role="alert">{ WEB_TRANSLATION.clipboardMessage }</p>
                             ) }
                         </div>
                     </div>
