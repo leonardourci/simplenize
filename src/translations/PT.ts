@@ -9,7 +9,7 @@ const PT = {
         lowerCase          : 'minúsculas',
         capitalize         : 'Primeiras Em Maiúsculas',
         paragraphsToOneLine: 'parágrafos para uma linha',
-        superscript        : 'sobresˢᶜʳⁱᵗᵒ',
+        superscript        : 'sobreˢᶜʳⁱᵗᵒ',
     },
 };
 
