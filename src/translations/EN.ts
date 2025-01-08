@@ -11,7 +11,7 @@ const EN: typeof PT = {
         lowerCase          : 'lowercase',
         paragraphsToOneLine: 'paragraphs to one line',
         capitalize         : 'First Capitalized',
-        superscript        : 'superscript',
+        superscript        : 'superˢᶜʳⁱᵖᵗ',
     },
 };
 
