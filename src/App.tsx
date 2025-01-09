@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import PortugueseTranslation from './translations/PT';
 import EnglishTranslation from './translations/EN';
 import SimplenizeHeaderLogo from './images/simplenize-logo.png';
+import AnimatedThemeToggle from './Components/AnimatedThemeToggle';
+import LanguageDropdown from './Components/LanguageDropdown';
 
 const TRANSLATION = {
     PT: PortugueseTranslation,
@@ -11,15 +13,7 @@ const TRANSLATION = {
 
 const WEB_USER_LANGUAGE = navigator.language.split ( '-' )[ 0 ].toUpperCase () as 'PT' | 'EN';
 
-const WEB_TRANSLATION = TRANSLATION[ WEB_USER_LANGUAGE ] || TRANSLATION.EN;
-
-const textTransformationOptions = [
-    WEB_TRANSLATION.transformationOptions.upperCase,
-    WEB_TRANSLATION.transformationOptions.lowerCase,
-    WEB_TRANSLATION.transformationOptions.capitalize,
-    WEB_TRANSLATION.transformationOptions.paragraphsToOneLine,
-    WEB_TRANSLATION.transformationOptions.superscript,
-];
+let WEB_TRANSLATION = TRANSLATION[ WEB_USER_LANGUAGE ] || TRANSLATION.EN;
 
 const SUPERSCRIPTS = {
     ' ': ' ',
@@ -73,10 +67,47 @@ export default function App () {
     const [ output, setOutput ] = useState ( '' );
     const [ copySuccess, setCopySuccess ] = useState ( false );
     const [ selectedTransformation, setSelectedTransformation ] = useState<string> ( '' );
+    const [ language, setLanguage ] = useState ( WEB_USER_LANGUAGE || TRANSLATION.EN );
+    const [ textTransformationOptions, setTextTransformationOptions ] = useState ( [
+        WEB_TRANSLATION.transformationOptions.upperCase,
+        WEB_TRANSLATION.transformationOptions.lowerCase,
+        WEB_TRANSLATION.transformationOptions.capitalize,
+        WEB_TRANSLATION.transformationOptions.paragraphsToOneLine,
+        WEB_TRANSLATION.transformationOptions.superscript,
+    ] );
 
     const setTransformation = ( transformation: string ) => {
         setSelectedTransformation ( prev => prev === transformation ? '' : transformation );
     };
+
+    useEffect ( () => {
+        const localStorageLanguage = localStorage.getItem ( 'language' );
+
+        if ( localStorageLanguage ) {
+            WEB_TRANSLATION = TRANSLATION[ localStorageLanguage as 'EN' | 'PT' ];
+            setLanguage ( localStorageLanguage as 'EN' | 'PT' );
+            setTextTransformationOptions ( [
+                    WEB_TRANSLATION.transformationOptions.upperCase,
+                    WEB_TRANSLATION.transformationOptions.lowerCase,
+                    WEB_TRANSLATION.transformationOptions.capitalize,
+                    WEB_TRANSLATION.transformationOptions.paragraphsToOneLine,
+                    WEB_TRANSLATION.transformationOptions.superscript,
+                ],
+            );
+        }
+    }, [] );
+
+    useEffect ( () => {
+        WEB_TRANSLATION = TRANSLATION[ language as 'EN' | 'PT' ];
+        setTextTransformationOptions ( [
+                WEB_TRANSLATION.transformationOptions.upperCase,
+                WEB_TRANSLATION.transformationOptions.lowerCase,
+                WEB_TRANSLATION.transformationOptions.capitalize,
+                WEB_TRANSLATION.transformationOptions.paragraphsToOneLine,
+                WEB_TRANSLATION.transformationOptions.superscript,
+            ],
+        );
+    }, [ language ] );
 
     useEffect ( () => {
         let transformedOutput = input;
@@ -144,19 +175,25 @@ export default function App () {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100">
-            <header className="w-full py-6 bg-white shadow-md">
-                <div className="container mx-auto px-4">
-                    <img className="mx-auto h-12 w-auto" src={ SimplenizeHeaderLogo } alt="Simplenize"/>
+        <div
+            className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-700">
+            <header className="w-full py-6 bg-white dark:bg-gray-800 shadow-md">
+                <div className="container mx-auto px-4 relative">
+                    <div className="flex justify-center">
+                        <img className="h-full w-auto" src={ SimplenizeHeaderLogo } alt="Simplenize"/>
+                    </div>
+                    <LanguageDropdown language={ language } setLanguage={ setLanguage }/>
+                    <AnimatedThemeToggle/>
                 </div>
             </header>
 
             <main className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-3xl mx-auto">
-                    <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
+                <div className="max-w-3xl mx-auto relative">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
                         <div className="p-8 space-y-8">
                             <div>
-                                <label htmlFor="multiline" className="block text-xl font-semibold text-gray-800 mb-3">
+                                <label htmlFor="multiline"
+                                       className="block text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">
                                     { WEB_TRANSLATION.textToTransform }
                                 </label>
                                 <textarea
@@ -164,13 +201,13 @@ export default function App () {
                                     value={ input }
                                     onChange={ ( e ) => setInput ( e.target.value ) }
                                     rows={ 6 }
-                                    className="w-full p-4 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out resize-none"
+                                    className="w-full p-4 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out resize-none"
                                     placeholder={ WEB_TRANSLATION.placeholder }
                                 />
                             </div>
 
                             <div>
-                                <h2 className="block text-xl font-semibold text-gray-800 mb-3">
+                                <h2 className="block text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">
                                     { WEB_TRANSLATION.selectATransformation }
                                 </h2>
                                 <div className="flex flex-wrap gap-2">
@@ -180,7 +217,7 @@ export default function App () {
                                             className={ `px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ease-in-out ${
                                                 selectedTransformation === option
                                                     ? 'bg-blue-500 text-white shadow-md transform scale-105'
-                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                                             }` }
                                             onClick={ () => setTransformation ( option ) }
                                         >
@@ -190,19 +227,20 @@ export default function App () {
                                 </div>
                             </div>
                             <div>
-                                <label htmlFor="singleline" className="block text-xl font-semibold text-gray-800 mb-3">
+                                <label htmlFor="singleline"
+                                       className="block text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">
                                     { WEB_TRANSLATION.output }
                                 </label>
                                 <div className="flex">
                                     <textarea
                                         readOnly
                                         value={ output }
-                                        className="flex-grow p-4 border-2 border-gray-300 rounded-l-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out resize-none"
+                                        className="flex-grow p-4 border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out resize-none"
                                     />
                                     <button
-                                        aria-label="Copiar para área de transferência"
+                                        aria-label="Copy to clipboard"
                                         onClick={ copyToClipboard }
-                                        className="flex items-center justify-center px-6 border-2 border-l-0 border-gray-300 rounded-r-lg bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:scale-105"
+                                        className="flex items-center justify-center border-0 px-6 rounded-r-lg bg-blue-500 text-white hover:bg-blue-600 focus:outline-none  focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:scale-105"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
                                              viewBox="0 0 24 24" stroke="currentColor">
@@ -214,7 +252,7 @@ export default function App () {
                             </div>
 
                             { copySuccess && (
-                                <p className="text-green-600 text-sm text-center font-medium animate-pulse"
+                                <p className="text-green-600 dark:text-green-400 text-sm text-center font-medium animate-pulse"
                                    role="alert">{ WEB_TRANSLATION.clipboardMessage }</p>
                             ) }
                         </div>
@@ -222,6 +260,7 @@ export default function App () {
                 </div>
             </main>
         </div>
-    );
+    )
+        ;
 }
 
