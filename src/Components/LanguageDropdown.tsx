@@ -1,41 +1,91 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { Listbox, Transition } from '@headlessui/react';
+import { motion } from 'framer-motion';
+import { CheckIcon, ChevronsUpDownIcon as ChevronUpDownIcon } from 'lucide-react';
 
-// Component for selecting language (Portuguese/English)
-export default function LanguageSelector ( { language, setLanguage }: any ) {
-    // State to manage the currently selected language
+type Language = 'PT' | 'EN'
 
-    // Handler function for when the language is changed
-    const handleLanguageChange = ( event: any ) => {
-        const selectedLanguage = event.target.value;
-        setLanguage ( selectedLanguage );
-        updateLocalStorage ( selectedLanguage );
-    };
+interface LanguageSelectorProps {
+    language: Language;
+    setLanguage: ( language: Language ) => void;
+}
 
-    // Initializes the language based on local storage or default setting
+const languages: { id: Language; name: string; flag: string }[] = [
+    { id: 'PT', name: 'Portuguese', flag: '🇧🇷' },
+    { id: 'EN', name: 'English', flag: '🇺🇸' },
+];
+
+export default function LanguageSelector ( { language, setLanguage }: LanguageSelectorProps ) {
+    const [ selectedLanguage, setSelectedLanguage ] = useState ( languages.find ( lang => lang.id === language ) || languages[ 0 ] );
+
     useEffect ( () => {
-        const storedLanguage = localStorage.getItem ( 'language' );
+        const storedLanguage = localStorage.getItem ( 'language' ) as Language;
         if ( storedLanguage ) {
-            setLanguage ( storedLanguage );
+            const lang = languages.find ( lang => lang.id === storedLanguage );
+            if ( lang ) {
+                setSelectedLanguage ( lang );
+                setLanguage ( lang.id );
+            }
         }
-    }, [] );
+    }, [ setLanguage ] );
 
-    // Updates localStorage with the current language setting
-    const updateLocalStorage = ( languageValue: any ) => {
-        localStorage.setItem ( 'language', languageValue );
+    const handleLanguageChange = ( selected: typeof selectedLanguage ) => {
+        setSelectedLanguage ( selected );
+        setLanguage ( selected.id );
+        localStorage.setItem ( 'language', selected.id );
     };
 
     return (
-        <select
-            value={ language }
-            onChange={ handleLanguageChange }
-            className="absolute right-14 p-2 top-1/2 rounded-t-2xl transform -translate-y-1/2 "
-            name="select your language"
-            aria-label="Select Language"
-        >
-            <option value="PT">🇧🇷</option>
-            <option value="EN">🇺🇸</option>
-        </select>
+        <Listbox value={ selectedLanguage } onChange={ handleLanguageChange }>
+            <div className="relative">
+                <Listbox.Button
+                    className="relative w-full cursor-pointer rounded-lg bg-white py-1 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm z-10">
+                    <span className="z-10 block text-2xl">{ selectedLanguage.flag }</span>
+                    <span className="z-10 pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                        <ChevronUpDownIcon className="z-10 h-5 w-5 text-gray-400" aria-hidden="true"/>
+                    </span>
+                </Listbox.Button>
+                <Transition
+                    as={ motion.div }
+                    leave="transition ease-in duration-100"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                >
+                    <Listbox.Options
+                        className="z-10 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                        { languages.map ( ( lang ) => (
+                            <Listbox.Option
+                                key={ lang.id }
+                                className={ ( { active } ) =>
+                                    `cursor-pointer relative select-none py-2 px-4 ${
+                                        active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
+                                    }`
+                                }
+                                value={ lang }
+                            >
+                                { ( { selected } ) => (
+                                    <motion.div
+                                        initial={ { opacity: 0, y: -10 } }
+                                        animate={ { opacity: 1, y: 0 } }
+                                        transition={ { duration: 0.2 } }
+                                        className="flex items-center justify-center"
+                                    >
+                                        <span className="z-10 block text-2xl">{ lang.flag }</span>
+                                        { selected && (
+                                            <span
+                                                className="absolute inset-y-0 right-0 flex items-center pr-3 text-amber-600">
+                                            </span>
+                                        ) }
+                                    </motion.div>
+                                ) }
+                            </Listbox.Option>
+                        ) ) }
+                    </Listbox.Options>
+                </Transition>
+            </div>
+        </Listbox>
     );
 }
+

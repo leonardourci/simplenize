@@ -57,22 +57,22 @@ export default function AnimatedThemeToggle() {
     return (
         // The theme toggle button with animation and correct aria-label for accessibility
         <button
-            onClick={toggleThemeMode}
-            className="absolute right-2 p-2 top-1/2 rounded-full transform -translate-y-1/2 bg-gray-200 dark:bg-yellow-400 text-gray-700 dark:text-gray-900 transition-colors duration-200"
-            aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            onClick={ toggleThemeMode }
+            className="shadow-md p-2 rounded-full bg-white dark:bg-yellow-400 text-gray-700 dark:text-gray-900 transition-colors duration-200"
+            aria-label={ isDarkMode ? 'Switch to light mode' : 'Switch to dark mode' }
         >
             <motion.div
-                key={isDarkMode ? 'dark' : 'light'}
+                key={ isDarkMode ? 'dark' : 'light' }
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                variants={iconAnimationVariants}
+                variants={ iconAnimationVariants }
             >
-                {isDarkMode ? (
-                    <Sun className="h-6 w-6" />
+                { isDarkMode ? (
+                    <Sun className="h-6 w-6"/>
                 ) : (
-                    <Moon className="h-6 w-6" />
-                )}
+                    <Moon className="h-6 w-6"/>
+                ) }
             </motion.div>
         </button>
     );

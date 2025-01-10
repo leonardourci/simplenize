@@ -163,14 +163,19 @@ export default function App () {
         <div
             className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-700">
             <header className="w-full py-6 bg-white dark:bg-gray-800 shadow-md">
-                <div className="container mx-auto px-4 relative">
-                    <div className="flex justify-center">
-                        <img className="h-full w-auto" src={ SimplenizeHeaderLogo } alt="Simplenize"/>
+                <div className="container mx-auto px-4">
+                    <div className="flex flex-col items-center sm:flex-row sm:justify-center sm:relative">
+                        <div className="mb-4 sm:mb-0">
+                            <img className="h-10 w-auto" src={ SimplenizeHeaderLogo } alt="Simplenize"/>
+                        </div>
+                        <div className="flex items-center justify-center space-x-4 sm:absolute sm:right-4">
+                            <LanguageDropdown language={ language } setLanguage={ setLanguage }/>
+                            <AnimatedThemeToggle/>
+                        </div>
                     </div>
-                    <LanguageDropdown language={ language } setLanguage={ setLanguage }/>
-                    <AnimatedThemeToggle/>
                 </div>
             </header>
+
 
             <main className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-3xl mx-auto relative">
