@@ -11,9 +11,11 @@ const TRANSLATION = {
     EN: EnglishTranslation,
 };
 
+const localStorageLanguage = localStorage.getItem ( 'language' );
+
 const WEB_USER_LANGUAGE = navigator.language.split ( '-' )[ 0 ].toUpperCase () as 'PT' | 'EN';
 
-let WEB_TRANSLATION = TRANSLATION[ WEB_USER_LANGUAGE ] || TRANSLATION.EN;
+let WEB_TRANSLATION = TRANSLATION[ localStorageLanguage as 'EN' | 'PT' ] || TRANSLATION[ WEB_USER_LANGUAGE ] || TRANSLATION.EN;
 
 const SUPERSCRIPTS = {
     ' ': ' ',
@@ -67,7 +69,7 @@ export default function App () {
     const [ output, setOutput ] = useState ( '' );
     const [ copySuccess, setCopySuccess ] = useState ( false );
     const [ selectedTransformation, setSelectedTransformation ] = useState<string> ( '' );
-    const [ language, setLanguage ] = useState ( WEB_USER_LANGUAGE || TRANSLATION.EN );
+    const [ language, setLanguage ] = useState ( localStorageLanguage as 'EN' | 'PT' || WEB_USER_LANGUAGE || TRANSLATION.EN );
     const [ textTransformationOptions, setTextTransformationOptions ] = useState ( [
         WEB_TRANSLATION.transformationOptions.upperCase,
         WEB_TRANSLATION.transformationOptions.lowerCase,
@@ -79,23 +81,6 @@ export default function App () {
     const setTransformation = ( transformation: string ) => {
         setSelectedTransformation ( prev => prev === transformation ? '' : transformation );
     };
-
-    useEffect ( () => {
-        const localStorageLanguage = localStorage.getItem ( 'language' );
-
-        if ( localStorageLanguage ) {
-            WEB_TRANSLATION = TRANSLATION[ localStorageLanguage as 'EN' | 'PT' ];
-            setLanguage ( localStorageLanguage as 'EN' | 'PT' );
-            setTextTransformationOptions ( [
-                    WEB_TRANSLATION.transformationOptions.upperCase,
-                    WEB_TRANSLATION.transformationOptions.lowerCase,
-                    WEB_TRANSLATION.transformationOptions.capitalize,
-                    WEB_TRANSLATION.transformationOptions.paragraphsToOneLine,
-                    WEB_TRANSLATION.transformationOptions.superscript,
-                ],
-            );
-        }
-    }, [] );
 
     useEffect ( () => {
         WEB_TRANSLATION = TRANSLATION[ language as 'EN' | 'PT' ];
