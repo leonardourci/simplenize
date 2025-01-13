@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { motion } from 'framer-motion';
-import { CheckIcon, ChevronsUpDownIcon as ChevronUpDownIcon } from 'lucide-react';
+import { ChevronsUpDownIcon as ChevronUpDownIcon } from 'lucide-react';
 
 type Language = 'PT' | 'EN'
 
@@ -13,8 +13,8 @@ interface LanguageSelectorProps {
 }
 
 const languages: { id: Language; name: string; flag: string }[] = [
-    { id: 'PT', name: 'Portuguese', flag: '🇧🇷' },
-    { id: 'EN', name: 'English', flag: '🇺🇸' },
+    { id: 'PT', name: 'Portuguese', flag: '🇧🇷' }, // Brazil flag
+    { id: 'EN', name: 'English', flag: '🇺🇸' }, // USA flag
 ];
 
 export default function LanguageSelector ( { language, setLanguage }: LanguageSelectorProps ) {
