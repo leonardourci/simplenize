@@ -82,6 +82,17 @@ export default function App () {
         setSelectedTransformation ( prev => prev === transformation ? '' : transformation );
     };
 
+    const getTransformationDescriptions = (language: 'EN' | 'PT') => {
+        const translations = TRANSLATION[language].transformationDescriptions;
+        return Object.keys(translations).map((key) => ({
+            key,
+            title: translations[key as keyof typeof translations].title,
+            description: translations[key as keyof typeof translations].description,
+        }));
+    };
+
+    const transformationDescriptions = getTransformationDescriptions(language);
+
     useEffect ( () => {
         WEB_TRANSLATION = TRANSLATION[ language as 'EN' | 'PT' ];
         setTextTransformationOptions ( [
@@ -230,8 +241,8 @@ export default function App () {
             </header>
 
             <div className="font-mono font-extrabold gap-3.5 text-2xl w-full mt-4 flex justify-center items-center">
-                <p className="text-cyan-600">{WEB_TRANSLATION.subHeader.simpleYourText}</p>
-                <p className="text-orange-500">{WEB_TRANSLATION.subHeader.transformations}</p>
+                <p className="text-cyan-600">{ WEB_TRANSLATION.subHeader.simpleYourText }</p>
+                <p className="text-orange-500">{ WEB_TRANSLATION.subHeader.transformations }</p>
             </div>
 
 
@@ -301,8 +312,27 @@ export default function App () {
                 </div>
             </main>
 
+            <div className="container mx-auto px-4">
+                <div className="flex gap-4 my-4 font-extrabold font-mono text-2xl w-full justify-center items-center">
+                    <p className='text-cyan-600'>{WEB_TRANSLATION.moreInfo.exploreOurText}</p>
+                    <p className='text-orange-500'>{WEB_TRANSLATION.moreInfo.transformations}</p>
+                </div>
+                <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    { transformationDescriptions.map ( ( transformationDescription ) => (
+                        <li key={ transformationDescription.key }
+                            className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200">
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                                { transformationDescription.title }
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-300">
+                                { transformationDescription.description }
+                            </p>
+                        </li>
+                    ) ) }
+                </ul>
+            </div>
 
-            <footer className="bottom-0 dark:text-white w-full text-center py-1 sm:py-1">
+            <footer className="bottom-0 mt-4 dark:text-white w-full text-center py-1 sm:py-1">
                 <p>&copy; { new Date ().getFullYear () } SimpleNize. { WEB_TRANSLATION.allRightsReserved }</p>
             </footer>
         </div>
