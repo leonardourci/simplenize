@@ -90,6 +90,9 @@ export default function App () {
                 WEB_TRANSLATION.transformationOptions.capitalize,
                 WEB_TRANSLATION.transformationOptions.paragraphsToOneLine,
                 WEB_TRANSLATION.transformationOptions.superscript,
+                WEB_TRANSLATION.transformationOptions.camelCase,
+                WEB_TRANSLATION.transformationOptions.snakeCase,
+                WEB_TRANSLATION.transformationOptions.pascalCase,
             ],
         );
     }, [ language ] );
@@ -101,13 +104,20 @@ export default function App () {
             case WEB_TRANSLATION.transformationOptions.paragraphsToOneLine:
                 transformedOutput = transformedOutput.replace ( /\s+|\n/g, ' ' ).trim ();
                 break;
-            case WEB_TRANSLATION.transformationOptions.upperCase:
+
+            case WEB_TRANSLATION.transformationOptions.upperCase: {
                 transformedOutput = transformedOutput.toUpperCase ();
                 break;
-            case WEB_TRANSLATION.transformationOptions.lowerCase:
+            }
+
+            case WEB_TRANSLATION.transformationOptions.lowerCase: {
+
                 transformedOutput = transformedOutput.toLowerCase ();
                 break;
-            case WEB_TRANSLATION.transformationOptions.superscript:
+            }
+
+            case WEB_TRANSLATION.transformationOptions.superscript: {
+
                 let superscriptResult = '';
                 for ( let index = 0; index < transformedOutput.length; index++ ) {
                     let character = transformedOutput[ index ];
@@ -120,8 +130,49 @@ export default function App () {
                 transformedOutput = superscriptResult;
 
                 break;
-            case WEB_TRANSLATION.transformationOptions.capitalize:
+            }
+
+            case WEB_TRANSLATION.transformationOptions.camelCase: {
+                transformedOutput = transformedOutput
+                    .split ( ' ' )
+                    .map ( ( word, index ) => {
+                        if ( index === 0 ) {
+                            return word.toLowerCase (); // First word is lowercase
+                        }
+                        return word.charAt ( 0 ).toUpperCase () + word.slice ( 1 ).toLowerCase (); // Capitalize subsequent words
+                    } )
+                    .join ( '' );
+                break;
+            }
+
+            case WEB_TRANSLATION.transformationOptions.snakeCase: {
+                let result = '';
+
+                const splitedWords = transformedOutput.toLowerCase ().split ( ' ' );
+                for ( let i = 0; i < splitedWords.length; i++ ) {
+                    const word = splitedWords[ i ];
+                    if ( i === splitedWords.length - 1 ) {
+                        result += word;
+                        continue;
+                    }
+                    result += word + '_';
+                }
+                transformedOutput = result;
+                break;
+            }
+
+            case WEB_TRANSLATION.transformationOptions.pascalCase: {
+
+                transformedOutput = transformedOutput
+                    .split ( ' ' )
+                    .map ( word => word.charAt ( 0 ).toUpperCase () + word.slice ( 1 ).toLowerCase () ) // Capitalize each word
+                    .join ( '' ); // Join without spaces
+                break;
+            }
+
+            case WEB_TRANSLATION.transformationOptions.capitalize: {
                 const result: string[] = [];
+
                 const textWords = transformedOutput.split ( ' ' );
                 for ( const word of textWords ) {
                     if ( word.length ) {
@@ -143,6 +194,8 @@ export default function App () {
 
                 transformedOutput = finalResult.join ( '' );
                 break;
+            }
+
         }
 
         setOutput ( transformedOutput );
@@ -162,7 +215,7 @@ export default function App () {
     return (
         <div
             className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-700">
-            <header className="w-full py-6 bg-white dark:bg-gray-800 shadow-md">
+            <header className="w-full py-3 bg-white dark:bg-gray-800 shadow-md">
                 <div className="container mx-auto px-4">
                     <div className="flex flex-col items-center sm:flex-row sm:justify-center sm:relative">
                         <div className="mb-4 sm:mb-0">
@@ -176,31 +229,16 @@ export default function App () {
                 </div>
             </header>
 
-
-            <main className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-3xl mx-auto relative">
+            <main className="py-4 mx-4">
+                <div className="min-w-full mx-auto ">
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
-                        <div className="p-8 space-y-8">
+                        <div className="py-8 px-5 space-y-2">
                             <div>
-                                <label htmlFor="multiline"
-                                       className="block text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">
-                                    { WEB_TRANSLATION.textToTransform }
-                                </label>
-                                <textarea
-                                    id="multiline"
-                                    value={ input }
-                                    onChange={ ( e ) => setInput ( e.target.value ) }
-                                    rows={ 6 }
-                                    className="w-full p-4 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out resize-none"
-                                    placeholder={ WEB_TRANSLATION.placeholder }
-                                />
-                            </div>
-
-                            <div>
-                                <h2 className="block text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                                <h2 className="block text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
                                     { WEB_TRANSLATION.selectATransformation }
                                 </h2>
-                                <div className="flex flex-wrap gap-2">
+
+                                <div className="flex flex-wrap gap-2 mb-3">
                                     { textTransformationOptions.map ( ( option ) => (
                                         <button
                                             key={ option }
@@ -215,29 +253,36 @@ export default function App () {
                                         </button>
                                     ) ) }
                                 </div>
-                            </div>
-                            <div>
-                                <label htmlFor="singleline"
-                                       className="block text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">
-                                    { WEB_TRANSLATION.output }
-                                </label>
-                                <div className="flex">
+
+                                <div className="flex flex-col md:flex-row gap-2">
+                                  <textarea
+                                      id="multiline"
+                                      value={ input }
+                                      onChange={ ( e ) => setInput ( e.target.value ) }
+                                      rows={ 6 }
+                                      className="w-full lg:h-80 md:w-1/2 p-4 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out resize-none"
+                                      placeholder={ WEB_TRANSLATION.inputPlaceholder }
+                                  />
+
+                                    <div className="flex w-full md:w-1/2">
                                     <textarea
+                                        placeholder={ WEB_TRANSLATION.outputPlaceholder }
                                         readOnly
                                         value={ output }
                                         className="flex-grow p-4 border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out resize-none"
                                     />
-                                    <button
-                                        aria-label="Copy to clipboard"
-                                        onClick={ copyToClipboard }
-                                        className="flex items-center justify-center border-0 px-6 rounded-r-lg bg-blue-500 text-white hover:bg-blue-600 focus:outline-none  focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:scale-105"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
-                                             viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 }
-                                                  d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
-                                        </svg>
-                                    </button>
+                                        <button
+                                            aria-label="Copy to clipboard"
+                                            onClick={ copyToClipboard }
+                                            className="flex items-center justify-center border-0 px-3 rounded-r-lg bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:scale-105"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none"
+                                                 viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 }
+                                                      d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -250,7 +295,6 @@ export default function App () {
                 </div>
             </main>
         </div>
-    )
-        ;
+    );
 }
 

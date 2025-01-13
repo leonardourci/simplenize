@@ -69,9 +69,9 @@ export default function AnimatedThemeToggle() {
                 variants={ iconAnimationVariants }
             >
                 { isDarkMode ? (
-                    <Sun className="h-6 w-6"/>
+                    <Sun className="h-5 w-5"/>
                 ) : (
-                    <Moon className="h-6 w-6"/>
+                    <Moon className="h-5 w-5"/>
                 ) }
             </motion.div>
         </button>
