@@ -229,6 +229,12 @@ export default function App () {
                 </div>
             </header>
 
+            <div className="font-mono font-extrabold gap-3.5 text-2xl w-full mt-4 flex justify-center items-center">
+                <p className="text-cyan-600">{WEB_TRANSLATION.subHeader.simpleYourText}</p>
+                <p className="text-orange-500">{WEB_TRANSLATION.subHeader.transformations}</p>
+            </div>
+
+
             <main className="py-4 mx-4">
                 <div className="min-w-full mx-auto ">
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
@@ -294,6 +300,11 @@ export default function App () {
                     </div>
                 </div>
             </main>
+
+
+            <footer className="bottom-0 dark:text-white w-full text-center py-1 sm:py-1">
+                <p>&copy; { new Date ().getFullYear () } SimpleNize. { WEB_TRANSLATION.allRightsReserved }</p>
+            </footer>
         </div>
     );
 }
