@@ -240,7 +240,7 @@ export default function App () {
                 </div>
             </header>
 
-            <div className="font-mono font-extrabold md:gap-3.5 text-2xl w-full mt-4 flex flex-col md:flex-row justify-center items-center">
+            <div className="font-mono text-center font-extrabold md:gap-3.5 text-2xl w-full mt-4 flex flex-col md:flex-row justify-center items-center">
                 <p className="text-cyan-600">{ WEB_TRANSLATION.subHeader.simpleYourText }</p>
                 <p className="text-orange-500">{ WEB_TRANSLATION.subHeader.transformations }</p>
             </div>
@@ -312,7 +312,7 @@ export default function App () {
             </main>
 
             <div className="container mx-auto px-4">
-                <div className="flex gap-4 my-4 font-extrabold font-mono text-2xl w-full justify-center items-center">
+                <div className="flex text-center flex-col md:flex-row md:gap-4 my-4 font-extrabold font-mono text-2xl w-full justify-center items-center">
                     <p className='text-cyan-600'>{WEB_TRANSLATION.moreInfo.exploreOurText}</p>
                     <p className='text-orange-500'>{WEB_TRANSLATION.moreInfo.transformations}</p>
                 </div>
