@@ -240,11 +240,10 @@ export default function App () {
                 </div>
             </header>
 
-            <div className="font-mono font-extrabold gap-3.5 text-2xl w-full mt-4 flex justify-center items-center">
+            <div className="font-mono font-extrabold md:gap-3.5 text-2xl w-full mt-4 flex flex-col md:flex-row justify-center items-center">
                 <p className="text-cyan-600">{ WEB_TRANSLATION.subHeader.simpleYourText }</p>
                 <p className="text-orange-500">{ WEB_TRANSLATION.subHeader.transformations }</p>
             </div>
-
 
             <main className="py-4 mx-4">
                 <div className="min-w-full mx-auto ">
