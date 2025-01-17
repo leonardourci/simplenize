@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
+import SimplenizeHeaderLogo from './images/simplenize-logo.png';
 import PortugueseTranslation from './translations/PT';
 import EnglishTranslation from './translations/EN';
-import SimplenizeHeaderLogo from './images/simplenize-logo.png';
 import AnimatedThemeToggle from './Components/AnimatedThemeToggle';
 import LanguageDropdown from './Components/LanguageDropdown';
+import Modal from './Components/Modal';
 
 const TRANSLATION = {
     PT: PortugueseTranslation,
@@ -16,6 +17,8 @@ const localStorageLanguage = localStorage.getItem ( 'language' );
 const WEB_USER_LANGUAGE = navigator.language.split ( '-' )[ 0 ].toUpperCase () as 'PT' | 'EN';
 
 let WEB_TRANSLATION = TRANSLATION[ localStorageLanguage as 'EN' | 'PT' ] || TRANSLATION[ WEB_USER_LANGUAGE ] || TRANSLATION.EN;
+
+const COPY_TO_CLIPBOARD_TIMES_BEFORE_OPEN_MODAL = 5;
 
 const SUPERSCRIPTS = {
     ' ': ' ',
@@ -65,6 +68,19 @@ const SUPERSCRIPTS = {
 };
 
 export default function App () {
+    const location = window.location.search;
+    const urlParams = location.split ( '?' );
+
+    let willOpenModalForDevMode: undefined | boolean = undefined;
+    const isUserFromBrazil = WEB_USER_LANGUAGE === 'PT';
+    if ( urlParams.includes ( 'devMode=true' ) || !isUserFromBrazil ) {
+        willOpenModalForDevMode = false;
+    }
+
+
+    const [ isModalOpen, setIsModalOpen ] = useState ( willOpenModalForDevMode ?? true );
+
+    const [ copyToClipboardTimes, setCopyToClipboardTimes ] = useState ( 1 );
     const [ input, setInput ] = useState ( '' );
     const [ output, setOutput ] = useState ( '' );
     const [ copySuccess, setCopySuccess ] = useState ( false );
@@ -82,16 +98,16 @@ export default function App () {
         setSelectedTransformation ( prev => prev === transformation ? '' : transformation );
     };
 
-    const getTransformationDescriptions = (language: 'EN' | 'PT') => {
-        const translations = TRANSLATION[language].transformationDescriptions;
-        return Object.keys(translations).map((key) => ({
+    const getTransformationDescriptions = ( language: 'EN' | 'PT' ) => {
+        const translations = TRANSLATION[ language ].transformationDescriptions;
+        return Object.keys ( translations ).map ( ( key ) => ( {
             key,
-            title: translations[key as keyof typeof translations].title,
-            description: translations[key as keyof typeof translations].description,
-        }));
+            title      : translations[ key as keyof typeof translations ].title,
+            description: translations[ key as keyof typeof translations ].description,
+        } ) );
     };
 
-    const transformationDescriptions = getTransformationDescriptions(language);
+    const transformationDescriptions = getTransformationDescriptions ( language );
 
     useEffect ( () => {
         WEB_TRANSLATION = TRANSLATION[ language as 'EN' | 'PT' ];
@@ -107,6 +123,27 @@ export default function App () {
             ],
         );
     }, [ language ] );
+
+    const openModal = () => {
+        if ( ( willOpenModalForDevMode === undefined || willOpenModalForDevMode ) && copyToClipboardTimes >= COPY_TO_CLIPBOARD_TIMES_BEFORE_OPEN_MODAL ) {
+            setCopyToClipboardTimes ( 0 );
+            setIsModalOpen ( true );
+        }
+    };
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText ( output ).then ( () => {
+            setCopySuccess ( true );
+            setTimeout ( () => {
+                setCopySuccess ( false );
+            }, 2500 );
+        } ).catch ( ( err ) => {
+            console.error ( 'Falha ao copiar texto: ', err );
+        } );
+
+        setCopyToClipboardTimes ( copyToClipboardTimes + 1 );
+        openModal ();
+    };
 
     useEffect ( () => {
         let transformedOutput = input;
@@ -212,23 +249,18 @@ export default function App () {
         setOutput ( transformedOutput );
     }, [ input, selectedTransformation ] );
 
-    const copyToClipboard = () => {
-        navigator.clipboard.writeText ( output ).then ( () => {
-            setCopySuccess ( true );
-            setTimeout ( () => {
-                setCopySuccess ( false );
-            }, 2500 );
-        } ).catch ( ( err ) => {
-            console.error ( 'Falha ao copiar texto: ', err );
-        } );
-    };
-
     return (
         <div
             className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-700">
+
+            <Modal isOpen={ isModalOpen } setIsOpen={ setIsModalOpen }/>
+
             <header className="w-full py-3 bg-white dark:bg-gray-800 shadow-md">
                 <div className="container mx-auto px-4">
                     <div className="flex flex-col items-center sm:flex-row sm:justify-center sm:relative">
+                        <div className="flex font-mono text-xs text-center flex-col sm:absolute sm:left-1">
+                            <a className="w-2/5" href="#" target="_blank"></a>
+                        </div>
                         <div className="mb-4 sm:mb-0">
                             <img className="h-10 w-auto" src={ SimplenizeHeaderLogo } alt="Simplenize"/>
                         </div>
@@ -240,7 +272,8 @@ export default function App () {
                 </div>
             </header>
 
-            <div className="font-mono text-center font-extrabold md:gap-3.5 text-2xl w-full mt-4 flex flex-col md:flex-row justify-center items-center">
+            <div
+                className="font-mono text-center font-extrabold md:gap-3.5 text-2xl w-full mt-4 flex flex-col md:flex-row justify-center items-center">
                 <p className="text-cyan-600">{ WEB_TRANSLATION.subHeader.simpleYourText }</p>
                 <p className="text-orange-500">{ WEB_TRANSLATION.subHeader.transformations }</p>
             </div>
@@ -270,7 +303,7 @@ export default function App () {
                                     ) ) }
                                 </div>
 
-                                <div className="flex flex-col md:flex-row gap-2">
+                                <div className="relative flex flex-col md:flex-row gap-2">
                                   <textarea
                                       id="multiline"
                                       value={ input }
@@ -299,6 +332,8 @@ export default function App () {
                                             </svg>
                                         </button>
                                     </div>
+
+
                                 </div>
                             </div>
 
@@ -312,10 +347,12 @@ export default function App () {
             </main>
 
             <div className="container mx-auto px-4">
-                <div className="flex text-center flex-col md:flex-row md:gap-4 my-4 font-extrabold font-mono text-2xl w-full justify-center items-center">
-                    <p className='text-cyan-600'>{WEB_TRANSLATION.moreInfo.exploreOurText}</p>
-                    <p className='text-orange-500'>{WEB_TRANSLATION.moreInfo.transformations}</p>
+                <div
+                    className="flex text-center flex-col md:flex-row md:gap-4 my-4 font-extrabold font-mono text-2xl w-full justify-center items-center">
+                    <p className="text-cyan-600">{ WEB_TRANSLATION.moreInfo.exploreOurText }</p>
+                    <p className="text-orange-500">{ WEB_TRANSLATION.moreInfo.transformations }</p>
                 </div>
+
                 <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     { transformationDescriptions.map ( ( transformationDescription ) => (
                         <li key={ transformationDescription.key }
@@ -331,8 +368,10 @@ export default function App () {
                 </ul>
             </div>
 
-            <footer className="bottom-0 mt-4 dark:text-white w-full text-center py-1 sm:py-1">
-                <p>&copy; { new Date ().getFullYear () } SimpleNize. { WEB_TRANSLATION.allRightsReserved }</p>
+            <footer className="bottom-0 mt-4 dark:text-white w-full text-center py-4 sm:py-4">
+                <p>&copy; { new Date ().getFullYear () } <a className="cursor-default"
+                                                            href="?devMode=true">SimpleNize</a>. { WEB_TRANSLATION.allRightsReserved }
+                </p>
             </footer>
         </div>
     );
