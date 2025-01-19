@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet';
 
 import SimplenizeHeaderLogo from './images/simplenize-logo.png';
 import PortugueseTranslation from './translations/PT';
