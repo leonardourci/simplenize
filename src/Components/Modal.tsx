@@ -21,7 +21,7 @@ export default function AutoOpenModal ( { isOpen, setIsOpen }: AutoOpenModalProp
             },
             {
                 bgImage: AssineAmazonPrime,
-                link   : 'https://www.amazon.com.br/prime?tag=hydrbrgk-20&ref=pd_sl_6e19kxu22a_e',
+                link   : 'https://amzn.to/3WpELKW',
             },
         ];
 
