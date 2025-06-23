@@ -5,6 +5,7 @@ const EN: typeof PT = {
     inputPlaceholder             : 'Write here the text you want to transform...',
     selectATransformation        : 'Select a transformation:',
     clipboardMessage             : 'Text copied to clipboard!',
+    autoClipboardMessage         : 'Text automatically copied to clipboard!',
     outputPlaceholder            : 'Output of your text transformation will appear here...',
     allRightsReserved            : 'All Rights Reserved.',
     moreInfo: {

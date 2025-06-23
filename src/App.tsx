@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import SimplenizeHeaderLogo from './images/simplenize-logo.png';
 import PortugueseTranslation from './translations/PT';
@@ -12,7 +12,7 @@ const TRANSLATION = {
     EN: EnglishTranslation,
 };
 
-const changePageInfoByLang = (language: 'EN' | 'PT')=> {
+const changePageInfoByLang = (language: 'EN' | 'PT') => {
     const htmlElement = document.documentElement;
 
     const titleElement = document.querySelector('title');
@@ -33,25 +33,25 @@ const changePageInfoByLang = (language: 'EN' | 'PT')=> {
         // 'text formatter', 'case converter', 'string manipulation', 'developer tools', 'marketing text tools'
     } else if (language === 'PT') {
         // Configurações para Português
-        htmlElement.setAttribute ( 'lang', 'pt-BR' );
+        htmlElement.setAttribute('lang', 'pt-BR');
 
-        if ( titleElement ) {
+        if (titleElement) {
             titleElement.textContent = 'Simplenize - Ferramenta Online de Transformação de Texto';
         }
 
-        if ( descriptionElement ) {
-            descriptionElement.setAttribute ( 'content', 'Simplenize: Ferramenta online gratuita para formatação e transformação de texto. Converta maiúsculas/minúsculas, camelCase, snakeCase e mais. Ideal para desenvolvedores' );
+        if (descriptionElement) {
+            descriptionElement.setAttribute('content', 'Simplenize: Ferramenta online gratuita para formatação e transformação de texto. Converta maiúsculas/minúsculas, camelCase, snakeCase e mais. Ideal para desenvolvedores');
         }
     }
 }
 
 changePageInfoByLang('EN');
 
-const localStorageLanguage = localStorage.getItem ( 'language' );
+const localStorageLanguage = localStorage.getItem('language');
 
-const WEB_USER_LANGUAGE = navigator.language.split ( '-' )[ 0 ].toUpperCase () as 'PT' | 'EN';
+const WEB_USER_LANGUAGE = navigator.language.split('-')[0].toUpperCase() as 'PT' | 'EN';
 
-let WEB_TRANSLATION = TRANSLATION[ localStorageLanguage as 'EN' | 'PT' ] || TRANSLATION[ WEB_USER_LANGUAGE ] || TRANSLATION.EN;
+let WEB_TRANSLATION = TRANSLATION[localStorageLanguage as 'EN' | 'PT'] || TRANSLATION[WEB_USER_LANGUAGE] || TRANSLATION.EN;
 
 const COPY_TO_CLIPBOARD_TIMES_BEFORE_OPEN_MODAL = 5;
 
@@ -102,25 +102,26 @@ const SUPERSCRIPTS = {
     ',': '˒',
 };
 
-export default function App () {
+export default function App() {
     const location = window.location.search;
-    const urlParams = location.split ( '?' );
+    const urlParams = location.split('?');
 
     let willOpenModalForDevMode: undefined | boolean = undefined;
     const isUserFromBrazil = WEB_USER_LANGUAGE === 'PT';
-    if ( urlParams.includes ( 'devMode=true' ) || !isUserFromBrazil ) {
+    if (urlParams.includes('devMode=true') || !isUserFromBrazil) {
         willOpenModalForDevMode = false;
     }
 
-    const [ isModalOpen, setIsModalOpen ] = useState ( willOpenModalForDevMode ?? true );
+    const [isModalOpen, setIsModalOpen] = useState(willOpenModalForDevMode ?? true);
 
-    const [ copyToClipboardTimes, setCopyToClipboardTimes ] = useState ( 1 );
-    const [ input, setInput ] = useState ( '' );
-    const [ output, setOutput ] = useState ( '' );
-    const [ copySuccess, setCopySuccess ] = useState ( false );
-    const [ selectedTransformation, setSelectedTransformation ] = useState<string> ( '' );
-    const [ language, setPageLanguage ] = useState ( localStorageLanguage as 'EN' | 'PT' || WEB_USER_LANGUAGE || TRANSLATION.EN );
-    const [ textTransformationOptions, setTextTransformationOptions ] = useState ( [
+    const [copyToClipboardTimes, setCopyToClipboardTimes] = useState(1);
+    const [input, setInput] = useState('');
+    const [output, setOutput] = useState('');
+    const [copySuccess, setCopySuccess] = useState(false);
+    const [autoCopySuccess, setAutoCopySuccess] = useState(false);
+    const [selectedTransformation, setSelectedTransformation] = useState<string>('');
+    const [language, setPageLanguage] = useState(localStorageLanguage as 'EN' | 'PT' || WEB_USER_LANGUAGE || TRANSLATION.EN);
+    const [textTransformationOptions, setTextTransformationOptions] = useState([
         WEB_TRANSLATION.transformationOptions.upperCase,
         WEB_TRANSLATION.transformationOptions.lowerCase,
         WEB_TRANSLATION.transformationOptions.capitalize,
@@ -129,7 +130,7 @@ export default function App () {
         WEB_TRANSLATION.transformationOptions.camelCase,
         WEB_TRANSLATION.transformationOptions.snakeCase,
         WEB_TRANSLATION.transformationOptions.pascalCase,
-    ] );
+    ]);
 
     const setLanguage = (language: 'EN' | 'PT') => {
         changePageInfoByLang(language)
@@ -137,83 +138,95 @@ export default function App () {
         setPageLanguage(language)
     }
 
-    const setTransformation = ( transformation: string ) => {
-        setSelectedTransformation ( prev => prev === transformation ? '' : transformation );
+    const setTransformation = (transformation: string) => {
+        setSelectedTransformation(prev => prev === transformation ? '' : transformation);
     };
 
-    const getTransformationDescriptions = ( language: 'EN' | 'PT' ) => {
-        const translations = TRANSLATION[ language ].transformationDescriptions;
-        return Object.keys ( translations ).map ( ( key ) => ( {
+    const getTransformationDescriptions = (language: 'EN' | 'PT') => {
+        const translations = TRANSLATION[language].transformationDescriptions;
+        return Object.keys(translations).map((key) => ({
             key,
-            title      : translations[ key as keyof typeof translations ].title,
-            description: translations[ key as keyof typeof translations ].description,
-        } ) );
+            title: translations[key as keyof typeof translations].title,
+            description: translations[key as keyof typeof translations].description,
+        }));
     };
 
-    const transformationDescriptions = getTransformationDescriptions ( language );
+    const transformationDescriptions = getTransformationDescriptions(language);
 
-    useEffect ( () => {
-        WEB_TRANSLATION = TRANSLATION[ language as 'EN' | 'PT' ];
-        setTextTransformationOptions ( [
-                WEB_TRANSLATION.transformationOptions.upperCase,
-                WEB_TRANSLATION.transformationOptions.lowerCase,
-                WEB_TRANSLATION.transformationOptions.capitalize,
-                WEB_TRANSLATION.transformationOptions.paragraphsToOneLine,
-                WEB_TRANSLATION.transformationOptions.superscript,
-                WEB_TRANSLATION.transformationOptions.camelCase,
-                WEB_TRANSLATION.transformationOptions.snakeCase,
-                WEB_TRANSLATION.transformationOptions.pascalCase,
-            ],
+    useEffect(() => {
+        WEB_TRANSLATION = TRANSLATION[language as 'EN' | 'PT'];
+        setTextTransformationOptions([
+            WEB_TRANSLATION.transformationOptions.upperCase,
+            WEB_TRANSLATION.transformationOptions.lowerCase,
+            WEB_TRANSLATION.transformationOptions.capitalize,
+            WEB_TRANSLATION.transformationOptions.paragraphsToOneLine,
+            WEB_TRANSLATION.transformationOptions.superscript,
+            WEB_TRANSLATION.transformationOptions.camelCase,
+            WEB_TRANSLATION.transformationOptions.snakeCase,
+            WEB_TRANSLATION.transformationOptions.pascalCase,
+        ],
         );
-    }, [ language ] );
+    }, [language]);
 
     const openModal = () => {
-        if ( ( willOpenModalForDevMode === undefined || willOpenModalForDevMode ) && copyToClipboardTimes >= COPY_TO_CLIPBOARD_TIMES_BEFORE_OPEN_MODAL ) {
-            setCopyToClipboardTimes ( 0 );
-            setIsModalOpen ( true );
+        if ((willOpenModalForDevMode === undefined || willOpenModalForDevMode) && copyToClipboardTimes >= COPY_TO_CLIPBOARD_TIMES_BEFORE_OPEN_MODAL) {
+            setCopyToClipboardTimes(0);
+            setIsModalOpen(true);
         }
     };
 
-    const copyToClipboard = () => {
-        navigator.clipboard.writeText ( output ).then ( () => {
-            setCopySuccess ( true );
-            setTimeout ( () => {
-                setCopySuccess ( false );
-            }, 2500 );
-        } ).catch ( ( err ) => {
-            console.error ( 'Falha ao copiar texto: ', err );
-        } );
+    const copyToClipboard = async () => {
+        await navigator.clipboard.writeText(output);
+        setCopySuccess(true);
+        setTimeout(() => {
+            setCopySuccess(false);
+        }, 2500);
 
-        setCopyToClipboardTimes ( copyToClipboardTimes + 1 );
-        openModal ();
+        setCopyToClipboardTimes(copyToClipboardTimes + 1);
+        openModal();
     };
 
-    useEffect ( () => {
+    const autoCopyToClipboard = useCallback(async () => {
+        if (output && selectedTransformation && input) {
+            await navigator.clipboard.writeText(output);
+            setAutoCopySuccess(true);
+            setTimeout(() => {
+                setAutoCopySuccess(false);
+            }, 2500);
+
+        }
+    }, [output, selectedTransformation, input]);
+
+    useEffect(() => {
+        autoCopyToClipboard();
+    }, [autoCopyToClipboard]);
+
+    useEffect(() => {
         let transformedOutput = input;
 
-        switch ( selectedTransformation ) {
+        switch (selectedTransformation) {
             case WEB_TRANSLATION.transformationOptions.paragraphsToOneLine:
-                transformedOutput = transformedOutput.replace ( /\s+|\n/g, ' ' ).trim ();
+                transformedOutput = transformedOutput.replace(/\s+|\n/g, ' ').trim();
                 break;
 
             case WEB_TRANSLATION.transformationOptions.upperCase: {
-                transformedOutput = transformedOutput.toUpperCase ();
+                transformedOutput = transformedOutput.toUpperCase();
                 break;
             }
 
             case WEB_TRANSLATION.transformationOptions.lowerCase: {
 
-                transformedOutput = transformedOutput.toLowerCase ();
+                transformedOutput = transformedOutput.toLowerCase();
                 break;
             }
 
             case WEB_TRANSLATION.transformationOptions.superscript: {
 
                 let superscriptResult = '';
-                for ( let index = 0; index < transformedOutput.length; index++ ) {
-                    let character = transformedOutput[ index ];
-                    if ( character.toLowerCase () in SUPERSCRIPTS ) {
-                        superscriptResult += SUPERSCRIPTS[ character.toLowerCase () as keyof typeof SUPERSCRIPTS ];
+                for (let index = 0; index < transformedOutput.length; index++) {
+                    let character = transformedOutput[index];
+                    if (character.toLowerCase() in SUPERSCRIPTS) {
+                        superscriptResult += SUPERSCRIPTS[character.toLowerCase() as keyof typeof SUPERSCRIPTS];
                     } else {
                         superscriptResult += character;
                     }
@@ -225,24 +238,24 @@ export default function App () {
 
             case WEB_TRANSLATION.transformationOptions.camelCase: {
                 transformedOutput = transformedOutput
-                    .split ( ' ' )
-                    .map ( ( word, index ) => {
-                        if ( index === 0 ) {
-                            return word.toLowerCase (); // First word is lowercase
+                    .split(' ')
+                    .map((word, index) => {
+                        if (index === 0) {
+                            return word.toLowerCase(); // First word is lowercase
                         }
-                        return word.charAt ( 0 ).toUpperCase () + word.slice ( 1 ).toLowerCase (); // Capitalize subsequent words
-                    } )
-                    .join ( '' );
+                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(); // Capitalize subsequent words
+                    })
+                    .join('');
                 break;
             }
 
             case WEB_TRANSLATION.transformationOptions.snakeCase: {
                 let result = '';
 
-                const splitedWords = transformedOutput.toLowerCase ().split ( ' ' );
-                for ( let i = 0; i < splitedWords.length; i++ ) {
-                    const word = splitedWords[ i ];
-                    if ( i === splitedWords.length - 1 ) {
+                const splitedWords = transformedOutput.toLowerCase().split(' ');
+                for (let i = 0; i < splitedWords.length; i++) {
+                    const word = splitedWords[i];
+                    if (i === splitedWords.length - 1) {
                         result += word;
                         continue;
                     }
@@ -255,42 +268,42 @@ export default function App () {
             case WEB_TRANSLATION.transformationOptions.pascalCase: {
 
                 transformedOutput = transformedOutput
-                    .split ( ' ' )
-                    .map ( word => word.charAt ( 0 ).toUpperCase () + word.slice ( 1 ).toLowerCase () ) // Capitalize each word
-                    .join ( '' ); // Join without spaces
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+                    .join(''); // Join without spaces
                 break;
             }
 
             case WEB_TRANSLATION.transformationOptions.capitalize: {
                 const result: string[] = [];
 
-                const textWords = transformedOutput.split ( ' ' );
-                for ( const word of textWords ) {
-                    if ( word.length ) {
-                        const capitalizedWord = word.slice ( 1 );
-                        result.push ( word[ 0 ].toUpperCase () + capitalizedWord );
+                const textWords = transformedOutput.split(' ');
+                for (const word of textWords) {
+                    if (word.length) {
+                        const capitalizedWord = word.slice(1);
+                        result.push(word[0].toUpperCase() + capitalizedWord);
                     }
                 }
 
                 const finalResult: string[] = [];
-                const multipleLinesSplit = result.join ( ' ' ).split ( '\n' );
+                const multipleLinesSplit = result.join(' ').split('\n');
 
-                for ( const word of multipleLinesSplit ) {
-                    if ( word.length ) {
-                        const capitalizedWord = word.slice ( 1 );
-                        const lastCharacter = selectedTransformation.includes ( WEB_TRANSLATION.transformationOptions.paragraphsToOneLine ) ? ' ' : '\n';
-                        finalResult.push ( word[ 0 ].toUpperCase () + capitalizedWord + lastCharacter );
+                for (const word of multipleLinesSplit) {
+                    if (word.length) {
+                        const capitalizedWord = word.slice(1);
+                        const lastCharacter = selectedTransformation.includes(WEB_TRANSLATION.transformationOptions.paragraphsToOneLine) ? ' ' : '\n';
+                        finalResult.push(word[0].toUpperCase() + capitalizedWord + lastCharacter);
                     }
                 }
 
-                transformedOutput = finalResult.join ( '' );
+                transformedOutput = finalResult.join('');
                 break;
             }
 
         }
 
-        setOutput ( transformedOutput );
-    }, [ input, selectedTransformation ] );
+        setOutput(transformedOutput);
+    }, [input, selectedTransformation]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-700">
@@ -330,11 +343,10 @@ export default function App () {
                                     {textTransformationOptions.map((option) => (
                                         <button
                                             key={option}
-                                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ease-in-out ${
-                                                selectedTransformation === option
-                                                    ? 'bg-blue-500 text-white shadow-md transform scale-105'
-                                                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                                            }`}
+                                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ease-in-out ${selectedTransformation === option
+                                                ? 'bg-blue-500 text-white shadow-md transform scale-105'
+                                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                                                }`}
                                             onClick={() => setTransformation(option)}
                                         >
                                             {option}
@@ -343,32 +355,32 @@ export default function App () {
                                 </div>
 
                                 <div className="relative flex flex-col md:flex-row gap-2">
-                            <textarea
-                                id="input-text"
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                rows={6}
-                                className="w-full lg:h-80 md:w-1/2 p-4 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out resize-none"
-                                placeholder={WEB_TRANSLATION.inputPlaceholder}
-                                aria-label="Input text"
-                            />
+                                    <textarea
+                                        id="input-text"
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        rows={6}
+                                        className="w-full lg:h-80 md:w-1/2 p-4 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out resize-none"
+                                        placeholder={WEB_TRANSLATION.inputPlaceholder}
+                                        aria-label="Input text"
+                                    />
 
                                     <div className="flex w-full md:w-1/2">
-                                <textarea
-                                    id="output-text"
-                                    placeholder={WEB_TRANSLATION.outputPlaceholder}
-                                    readOnly
-                                    value={output}
-                                    className="flex-grow p-4 border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out resize-none"
-                                    aria-label="Output text"
-                                />
+                                        <textarea
+                                            id="output-text"
+                                            placeholder={WEB_TRANSLATION.outputPlaceholder}
+                                            readOnly
+                                            value={output}
+                                            className="flex-grow p-4 border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out resize-none"
+                                            aria-label="Output text"
+                                        />
                                         <button
                                             aria-label="Copy to clipboard"
                                             onClick={copyToClipboard}
                                             className="flex items-center justify-center border-0 px-3 rounded-r-lg bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:scale-105"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                                             </svg>
                                         </button>
                                     </div>
@@ -377,6 +389,12 @@ export default function App () {
                                 {copySuccess && (
                                     <p className="text-green-600 dark:text-green-400 text-sm text-center font-medium animate-pulse" role="alert">
                                         {WEB_TRANSLATION.clipboardMessage}
+                                    </p>
+                                )}
+
+                                {autoCopySuccess && (
+                                    <p className="text-blue-600 dark:text-blue-400 text-sm text-center font-medium animate-pulse" role="alert">
+                                        {WEB_TRANSLATION.autoClipboardMessage}
                                     </p>
                                 )}
                             </div>

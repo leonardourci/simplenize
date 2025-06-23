@@ -3,6 +3,7 @@ const PT = {
     inputPlaceholder     : 'Escreva aqui o texto que você quer transformar...',
     selectATransformation: 'Selecione uma transformação:',
     clipboardMessage     : 'Texto copiado para a área de transferência!',
+    autoClipboardMessage : 'Texto copiado automaticamente para a área de transferência!',
     outputPlaceholder    : 'Resultado da sua transformação aparecerá aqui...',
     allRightsReserved    : 'Todos os direitos reservados.',
     moreInfo: {
