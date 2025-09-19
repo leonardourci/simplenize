@@ -55,6 +55,8 @@ let WEB_TRANSLATION = TRANSLATION[localStorageLanguage as 'EN' | 'PT'] || TRANSL
 
 const COPY_TO_CLIPBOARD_TIMES_BEFORE_OPEN_MODAL = 5;
 
+const MODAL_ENABLED = false;
+
 const SUPERSCRIPTS = {
     ' ': ' ',
     '0': '⁰',
@@ -112,7 +114,7 @@ export default function App() {
         willOpenModalForDevMode = false;
     }
 
-    const [isModalOpen, setIsModalOpen] = useState(willOpenModalForDevMode ?? true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [copyToClipboardTimes, setCopyToClipboardTimes] = useState(1);
     const [input, setInput] = useState('');
@@ -169,6 +171,7 @@ export default function App() {
     }, [language]);
 
     const openModal = () => {
+        if (!MODAL_ENABLED) return;
         if ((willOpenModalForDevMode === undefined || willOpenModalForDevMode) && copyToClipboardTimes >= COPY_TO_CLIPBOARD_TIMES_BEFORE_OPEN_MODAL) {
             setCopyToClipboardTimes(0);
             setIsModalOpen(true);
@@ -307,7 +310,9 @@ export default function App() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-700">
-            <Modal isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
+            {MODAL_ENABLED && (
+                <Modal isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
+            )}
 
             <header className="w-full py-3 bg-white dark:bg-gray-800 shadow-md">
                 <div className="container mx-auto px-4">
